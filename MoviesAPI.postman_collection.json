@@ -1,0 +1,968 @@
+{
+	"info": {
+		"_postman_id": "7fc26edc-ad7a-4072-9e62-9d9a064e14b7",
+		"name": "MoviesAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22839287"
+	},
+	"item": [
+		{
+			"name": "Get the first auditorium id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Auditorium Id defined\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var auditorium = jsonData[0];",
+							"    pm.collectionVariables.set(\"auditoriumId\", auditorium.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/auditoriums",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"auditoriums"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get the first movie id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Movie Id defined\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var movie = jsonData[0];",
+							"    pm.collectionVariables.set(\"movieId\", movie.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/movies",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"movies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create showtime for the movie in the auditorium",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var moment = require('moment');",
+							"console.log(moment().add(1, 'days').format());",
+							"pm.collectionVariables.set('showtimeDate', moment().add(1, 'days').format());"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Showtime Id defined\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.collectionVariables.set(\"showtimeId\", jsonData.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sessionDate\": \"{{showtimeDate}}\",\n    \"externalMovieId\": \"{{movieId}}\",\n    \"auditoriumId\": \"{{auditoriumId}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/showtimes",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"showtimes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get created showtime",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Seat Ids defined\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var seats = jsonData.auditorium.seats;",
+							"",
+							"    pm.collectionVariables.set(\"firstSeatId\", seats[0].id);",
+							"    pm.collectionVariables.set(\"secondSeatId\", seats[1].id);",
+							"    pm.collectionVariables.set(\"thirdSeatId\", seats[2].id);",
+							"    pm.collectionVariables.set(\"seatIdNotContiguous\", seats[5].id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/showtimes/{{showtimeId}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"showtimes",
+						"{{showtimeId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fail - Reserve seats not contiguous",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"showtimeId\": \"{{showtimeId}}\",\n    \"bookedSeats\": [\n        {\"seatId\": \"{{firstSeatId}}\"},\n        {\"seatId\": \"{{secondSeatId}}\"},\n        {\"seatId\": \"{{thirdSeatId}}\"},\n        {\"seatId\": \"{{seatIdNotContiguous}}\"}\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OK - Reserve seats contiguous",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Ticket Id defined\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.collectionVariables.set(\"ticketId\", jsonData.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"showtimeId\": \"{{showtimeId}}\",\n    \"bookedSeats\": [\n        {\"seatId\": \"{{firstSeatId}}\"},\n        {\"seatId\": \"{{secondSeatId}}\"},\n        {\"seatId\": \"{{thirdSeatId}}\"}\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fail - Seats already reserved",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"showtimeId\": \"{{showtimeId}}\",\n    \"bookedSeats\": [\n        {\"seatId\": \"{{firstSeatId}}\"},\n        {\"seatId\": \"{{secondSeatId}}\"},\n        {\"seatId\": \"{{thirdSeatId}}\"}\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get created showtime with seats reserved",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var seats = jsonData.auditorium.seats;",
+							"",
+							"pm.test(\"First seat reserved\", function () {",
+							"    pm.expect(seats[0].isReserved).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Second seat reserved\", function () {",
+							"    pm.expect(seats[1].isReserved).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Third seat reserved\", function () {",
+							"    pm.expect(seats[2].isReserved).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Fourth seat is not reserved\", function () {",
+							"    pm.expect(seats[3].isReserved).to.eql(false);",
+							"});",
+							"",
+							"pm.test(\"Fifth seat is not reserved\", function () {",
+							"    pm.expect(seats[4].isReserved).to.eql(false);",
+							"});",
+							"",
+							"pm.test(\"Sixth seat is not reserved\", function () {",
+							"    pm.expect(seats[5].isReserved).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/showtimes/{{showtimeId}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"showtimes",
+						"{{showtimeId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cancel reserve",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets/{{ticketId}}/cancel",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets",
+						"{{ticketId}}",
+						"cancel"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Created ticket not found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets/{{ticketId}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets",
+						"{{ticketId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get created showtime with seats not reserved",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var seats = jsonData.auditorium.seats;",
+							"",
+							"pm.test(\"First seat is not reserved anymore\", function () {",
+							"    pm.expect(seats[0].isReserved).to.eql(false);",
+							"});",
+							"",
+							"pm.test(\"Second seat is not reserved anymore\", function () {",
+							"    pm.expect(seats[1].isReserved).to.eql(false);",
+							"});",
+							"",
+							"pm.test(\"Third seat is not reserved anymore\", function () {",
+							"    pm.expect(seats[2].isReserved).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/showtimes/{{showtimeId}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"showtimes",
+						"{{showtimeId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OK - Reserve the same seats after cancel previous reservation",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Second ticket id defined\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.collectionVariables.set(\"secondTicketId\", jsonData.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"showtimeId\": \"{{showtimeId}}\",\n    \"bookedSeats\": [\n        {\"seatId\": \"{{firstSeatId}}\"},\n        {\"seatId\": \"{{secondSeatId}}\"},\n        {\"seatId\": \"{{thirdSeatId}}\"}\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get created showtime with seats reserved again",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var seats = jsonData.auditorium.seats;",
+							"",
+							"pm.test(\"First seat reserved\", function () {",
+							"    pm.expect(seats[0].isReserved).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Second seat reserved\", function () {",
+							"    pm.expect(seats[1].isReserved).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Third seat reserved\", function () {",
+							"    pm.expect(seats[2].isReserved).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Fourth seat is not reserved\", function () {",
+							"    pm.expect(seats[3].isReserved).to.eql(false);",
+							"});",
+							"",
+							"pm.test(\"Fifth seat is not reserved\", function () {",
+							"    pm.expect(seats[4].isReserved).to.eql(false);",
+							"});",
+							"",
+							"pm.test(\"Sixth seat is not reserved\", function () {",
+							"    pm.expect(seats[5].isReserved).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/showtimes/{{showtimeId}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"showtimes",
+						"{{showtimeId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get created ticket still not paid",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Ticket still not paid\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.paid).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets/{{secondTicketId}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets",
+						"{{secondTicketId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm reserve/payment",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets/{{secondTicketId}}/confirm",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets",
+						"{{secondTicketId}}",
+						"confirm"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get created ticket paid",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Ticket paid\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.paid).to.eql(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets/{{secondTicketId}}",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets",
+						"{{secondTicketId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fail - Seats already paid",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"showtimeId\": \"{{showtimeId}}\",\n    \"bookedSeats\": [\n        {\"seatId\": \"{{firstSeatId}}\"},\n        {\"seatId\": \"{{secondSeatId}}\"},\n        {\"seatId\": \"{{thirdSeatId}}\"}\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fail - Cancel reserve already paid",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:{{httpsPort}}/api/tickets/{{secondTicketId}}/cancel",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "{{httpsPort}}",
+					"path": [
+						"api",
+						"tickets",
+						"{{secondTicketId}}",
+						"cancel"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "auditoriumId",
+			"value": ""
+		},
+		{
+			"key": "movieId",
+			"value": ""
+		},
+		{
+			"key": "showtimeDate",
+			"value": ""
+		},
+		{
+			"key": "showtimeId",
+			"value": ""
+		},
+		{
+			"key": "firstSeatId",
+			"value": ""
+		},
+		{
+			"key": "secondSeatId",
+			"value": ""
+		},
+		{
+			"key": "thirdSeatId",
+			"value": ""
+		},
+		{
+			"key": "ticketId",
+			"value": ""
+		},
+		{
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "secondTicketId",
+			"value": ""
+		},
+		{
+			"key": "seatIdNotContiguous",
+			"value": ""
+		},
+		{
+			"key": "httpsPort",
+			"value": "7143",
+			"type": "string"
+		}
+	]
+}

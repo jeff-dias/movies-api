@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "Movies.Application";
+
+package movies;
+
+// The movie service definition.
+service Movies {
+  // Getting all movies
+  rpc GetAll (google.protobuf.Empty) returns (MoviesResponse);
+
+  // Getting by ID
+  rpc GetById (GetByIdRequest) returns (MovieResponse);
+}
+
+// The request message containing the movie ID.
+message GetByIdRequest {
+  string id = 1;
+}
+
+// The response message containing the movies.
+message MoviesResponse {
+  repeated MovieResponse movies = 1;
+}
+
+// The response message containing the movie details.
+message MovieResponse {
+    string id = 1;
+    string rank = 2;
+    string title = 3;
+    string full_title = 4;
+    string year = 5;
+    string image = 6;
+    string crew = 7;
+    string imdb_rating = 8;
+    string imdb_rating_count = 9;
+  }

@@ -1,0 +1,53 @@
+services:
+  cache:
+    container_name: redis
+    image: "redis"
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - movies-network
+
+  api:
+    container_name: movies-rpc-provider
+    image: jeffdias/50ef2f1a-3d85-41ba-9efb-6eb77860b595:1.0.0
+    ports:
+      - "7172:80"
+      - "7443:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_HTTPS_PORT=7443
+    volumes:
+      - ~/.aspnet/https:/https:ro
+    networks:
+      - movies-network
+    depends_on:
+      - cache
+
+  app:
+    container_name: movies-cqrs-service
+    image: jeffdias/c3dff76d-196b-49ea-9d3a-9e6458f37275:2.0.1
+    ports:
+      - "7180:80"
+      - "7143:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_HTTPS_PORT=7143
+      - PROVIDER_API_URL=http://172.17.0.1:7172
+      - REDIS_CACHE_URL=redis:6379
+    volumes:
+      - ~/.aspnet/https:/https:ro
+    networks:
+      - movies-network
+    depends_on:
+      - api
+
+networks:
+  movies-network:
+    driver: bridge
